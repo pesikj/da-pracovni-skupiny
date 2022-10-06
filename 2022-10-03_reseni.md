@@ -1,0 +1,117 @@
+# Chroustání seznamů
+
+## Nápravy
+
+Dostala jsi následující seznam, kde jsou vzdálenosti mezi nápravami přípojných vozidel nákladních automobilů.
+
+```py
+napravy = ["1323;1341", "3459;1023;1094", "1241;1231;1247", "3421,983,956,954", "3981"]
+```
+
+* Vytvoř dvourozměrný seznam, kde budou jednotlivé vzdálenosti jako samostatné prvky seznamu.
+* Spočti průměrný počet náprav v našem vzorku.
+
+```py
+napravy = ["1323;1341", "3459;1023;1094", "1241;1231;1247", "3421,983,956,954", "3981"]
+# Někdo píše čárku místo středníku, musíme tedy znaky nahradit
+napravy = [vozidlo.replace(",", ";") for vozidlo in napravy]
+# Tento řádek jde sloučit z předchozím, je to ukázáno v záznamu
+napravy = [vozidlo.split(";") for vozidlo in napravy]
+# Např. dvě vzdálenosti náprav znamená, že auto má celkem tři nápravy - proto je tam + 1 :-)
+pocty = [len(vozidlo) + 1 for vozidlo in napravy]
+print(f"Průměrný počet náprav je {statistics.mean(pocty)}.")
+# Kdybychom chtěli vzdálenosti jako čísla.
+# Zde musíme využít "zanořené chroustání", protože musíme postupně zpracovat všechny prvky vnitřního seznamu
+napravy = [[int(naprava) for naprava in auto] for auto in napravy]
+```
+
+## Rodná čísla
+
+Máme následující seznam rodných čísel pacientů lékařské ordinace:
+
+```py
+["6802218280", "7058284849", "7411242432", "6908037642", "6604232404", "7904017748", "9154056219", "9462207975", "8712123974"]
+```
+
+* Rodné číslo by mělo být dělitelné číslem 11 beze zbytku (platí od roku 1954). Vytvoř seznam pravdivostních hodnot, kde bude hodnota `False` v případě, že číslo neprošlo kontrolou, tj. není dělitelné 11. Pokud je dělitelné 11 beze zbytku, vlož tam hodnotu `True`.
+* Vytvoř seznam s daty narození ve formátu DD.MM.YYYY, k vytvoření využij f-stringy.
+
+```py
+rodna_cisla = ["6802218280", "7058284849", "7411242432", "6908037642", "6604232404", "7904017748", "9154056219", "9462207975", "8712123974"]
+kontrola = [int(cislo) % 11 == 0 for cislo in rodna_cisla]
+```
+
+Tady máte pár bonusů, které nám pomůžou vyřešit druhý bod ze zadání.
+
+```py
+# Vytvoř seznam, který bude obsahovat roky narození pacientů (jako celá čísla).
+# Víme, že do ordinace chodí pouze lidé narození před rokem 2000. Kdybychom to nevěděli, museli bychom řešit, zda na začátek dát 19 nebo 20
+roky = [int(f'19{cislo[:2]}') for cislo in rodna_cisla]
+
+# Vytvoř seznam, který bude obsahovat měsíce narození (jako celá čísla). U můžu jdou čísla měsíce od 1, u žen od 51.
+# Alternativně je možné použít celočíselné dělení - zkus ho použít!
+mesic_naroz = [cislo[2].replace("5","0") + cislo[3] for cislo in rodna_cisla]
+mesic_naroz = [int(cislo[0].replace("6","1") + cislo[1]) for cislo in mesic_naroz]
+
+# Vytvoř dvourozměrný seznam, kde vnitřní seznamy budou obsahovat rok, měsíc a den narození jednotlivých pacientů.
+rok_mesic_den = [[int(cislo[:2])+1900, int(cislo[2:4]) %50, int(cislo[4:6])] for cislo in rodna_cisla]
+# [[1968, 5, 21], [1970, 8, 28]]
+```
+
+A nakonec řešení druhého bodu.
+
+```py
+rodna_cisla = ["6802218280", "7058284849", "7411242432", "6908037642", "6604232404", "7904017748", "9154056219", "9462207975", "8712123974"]
+data_narozeni = [f"{int(cislo[4:6])}.{int(cislo[2:4]) % 50}.19{cislo[:2]}" for cislo in rodna_cisla] 
+```
+
+## Závody
+
+V následujícím dvourozměrném seznamu máme opět časy běhů na 100 metrů, tentokrát ve dvou ročnících závodu. Na nultém místě vnořeného seznamu je čas závodníka v roce 2020 a na prvním místě čas v roce 2021.
+
+```py
+zavody = [[10.39, 11.23], [13.86, 12.31], [11.94, 11.18], [14.35, 13.98], [12.64, 15.48], [11.24, 10.95], [13.37, 12.39]]
+```
+
+* Vytvoř seznam, ve kterém bude vidět změna v čase závodníka (změna může být kladná i záporná).
+* O kolik se v průměru změnil čas závodníka?
+* Vypočti medián dat z předchozího bodu. Dokážeš podle něj říct, jestli se zvětšina závodníků zlepšíla nebo zhoršila?
+* Vytvoř seznam, kde budou rozdíly časů pouze těch závodníků, kteří se zlepšili. Kolik jich bylo?
+
+```py
+# Vytvoř seznam, ve kterém bude vidět změna v čase závodníka (změna může být kladná i záporná).
+zmeny = [round(zavod[1]-zavod[0], 2) for zavod in zavody]
+
+# O kolik se v průměru změnil čas závodníka?
+import statistics
+print(statistics.mean(zmeny))
+
+"""
+Vypočti medián dat. Dokážeš podle něj říct, jestli se zvětšina závodníků zlepšíla nebo zhoršila?
+Medián je záporný, takže se většina závodníků zlepšila.
+"""
+print(statistics.median(zmeny))
+
+# Vytvoř seznam, kde budou rozdíly časů pouze těch závodníků, kteří se zlepšili. Kolik jich bylo?
+# Dva různé způsoby řešení
+zlepseni = [cas for cas in zmeny if cas < 0]
+print(len(zlepseni))
+zlepseni = [cas[1]-cas[0] for cas in zavody if cas[1]-cas[0]<0]
+print(len(zlepseni))
+```
+
+## Závod podruhé
+
+Uvažujme seznam, se kterým jsme pracovali v předchozí části, tj.
+
+```py
+seznam = [["Brunner Radek", [3, 0, 9]], ["Urban Jaroslav", [3, 11, 44]], ["Andrle Jakub", [3, 12, 21]], ["Fiala Stanislav", [3, 13, 31]]]
+```
+
+- Vytvoř dvourozměrný seznam, kde na nulté pozici vnořeného seznamu je číslo běžce a na první pozici je čas běžce v minutách jako desetinné číslo.
+- Vytvoř další dvourozměrný seznam, kde na nulté pozici vnořeného seznamu je číslo běžce a na první pozici je rozdíl času běžce oproti času vítěze v minutách. Jinak řečeno, bude tam číslo, které udává, o kolik by běžec musel být rychlejší, aby závod vyhrál.
+
+```py
+seznam_2 = [[cislo, seznam[cislo][1][0] * 60 + seznam[cislo][1][1] + seznam[cislo][1][2] / 60] for cislo in cisla]
+seznam_3 = [[cislo, seznam[cislo][1][0] * 60 + seznam[cislo][1][1] + seznam[cislo][1][2] / 60 - cas_viteze] for cislo in cisla]      
+```
